@@ -70,7 +70,7 @@ jobs:
           echo "USE_SUKISU=${{ github.event.inputs.USE_SUKISU }}" >> $GITHUB_ENV
           echo "SUKISU_MODE=${{ github.event.inputs.SUKISU_MODE }}" >> $GITHUB_ENV
           # 修正：这里应读取 USE_ReKernel 本身，而不是 USE_KERNELSU
-          echo "USE_ReKernel=${{ github.event.inputs.USE_ReKernel }}" >> $GITHUB_ENV
+          echo "USE_ReKernel=${{ github.event.inputs.USE_SUKISU }}" >> $GITHUB_ENV
           echo "MAKE_BOOT_IMAGE=${{ github.event.inputs.MAKE_BOOT_IMAGE }}" >> $GITHUB_ENV
           echo "SOURCE_BOOT_IMAGE=${{ github.event.inputs.SOURCE_BOOT_IMAGE }}" >> $GITHUB_ENV
         fi
