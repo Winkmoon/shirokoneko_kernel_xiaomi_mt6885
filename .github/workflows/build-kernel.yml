@@ -1,44 +1,45 @@
 name: Build Kernel
 on:
   push:
-
   workflow_dispatch:
     inputs:
-       KERNEL_DEFCONFIG:
-         description: 'Defconfig'
-         required: true
-         default: 'vendor/cezanne_user_defconfig'
-       KERNEL_FILE:
-         description: 'Your kernel out image name'
-         required: true
-         default: 'Image.gz-dtb'
-       BUILD_EXTRA_COMMAND:
-         description: 'Extra build commands(e.g. LLVM=1 LLVM_IAS=1)'
-         required: false
-         default: ''
-       USE_KERNELSU:
-         description: 'Use KernelSU'
-         required: true
-         default: 'true'
-         type: boolean
-       KERNELSU_TAG:
-         description: 'KernelSU Tag'
-         required: true
-         default: 'v0.9.5'
-       USE_ReKernel:
-         description: 'Built-in Re:Kernel'
-         required: true
-         default: 'true'
-         type: boolean
-       MAKE_BOOT_IMAGE:
-         description: 'Make boot image'
-         required: false
-         default: 'true'
-         type: boolean
-       SOURCE_BOOT_IMAGE:
-         description: 'Your original boot image url'
-         required: false
-         default: 'https://raw.githubusercontent.com/xiaomi-mt6885-devs/android_kernel_xiaomi_mt6885/cgroup-v2/.github/boot.img'
+      KERNEL_DEFCONFIG:
+        description: 'Defconfig'
+        required: true
+        default: 'vendor/cezanne_user_defconfig'
+      KERNEL_FILE:
+        description: 'Your kernel out image name'
+        required: true
+        default: 'Image.gz-dtb'
+      BUILD_EXTRA_COMMAND:
+        description: 'Extra build commands (e.g. LLVM=1 LLVM_IAS=1)'
+        required: false
+        default: ''
+      # --- 用 SukiSU-Ultra 取代 KernelSU ---
+      USE_SUKISU:
+        description: 'Use SukiSU-Ultra'
+        required: true
+        default: 'true'
+        type: boolean
+      SUKISU_MODE:
+        description: 'SukiSU integrate mode: main (GKI) | nongki (non-GKI) | susfs-<branch>'
+        required: true
+        default: 'main'
+      # ------------------------------------
+      USE_ReKernel:
+        description: 'Built-in Re:Kernel'
+        required: true
+        default: 'true'
+        type: boolean
+      MAKE_BOOT_IMAGE:
+        description: 'Make boot image'
+        required: false
+        default: 'true'
+        type: boolean
+      SOURCE_BOOT_IMAGE:
+        description: 'Your original boot image url'
+        required: false
+        default: 'https://raw.githubusercontent.com/xiaomi-mt6885-devs/android_kernel_xiaomi_mt6885/cgroup-v2/.github/boot.img'
 
 jobs:
   build:
@@ -50,26 +51,28 @@ jobs:
       CCACHE_HARDLINK: "true"
     steps:
     - uses: actions/checkout@v3
+
     - name: Setup Configuration
       run: |
-        if [ $(cat .github/config.env | grep "USE_CONFIG" | head -n 1 | cut -d "=" -f 2) = true -o -z ${{ github.event.inputs.KERNEL_DEFCONFIG }} ];then
-            echo "KERNEL_DEFCONFIG=$(cat .github/config.env | grep -w "KERNEL_DEFCONFIG" | head -n 1 | cut -d "=" -f 2)" >> $GITHUB_ENV
-            echo "KERNEL_FILE=$(cat .github/config.env | grep -w "KERNEL_FILE" | head -n 1 | cut -d "=" -f 2)" >> $GITHUB_ENV
-            echo "BUILD_EXTRA_COMMAND=$(cat .github/config.env | grep -w "EXTRA_BUILD_COMMAND" | head -n 1 | cut -d ":" -f 2)" >> $GITHUB_ENV
-            echo "USE_KERNELSU=$(cat .github/config.env | grep -w "USE_KERNELSU" | head -n 1 | cut -d "=" -f 2)" >> $GITHUB_ENV
-            echo "USE_ReKernel=$(cat .github/config.env | grep -w "USE_ReKernel" | head -n 1 | cut -d "=" -f 2)" >> $GITHUB_ENV
-            echo "KERNELSU_TAG=$(cat .github/config.env | grep -w "KERNELSU_TAG" | head -n 1 | cut -d "=" -f 2)" >> $GITHUB_ENV
-            echo "MAKE_BOOT_IMAGE=$(cat .github/config.env | grep -w "MAKE_BOOT_IMAGE" | head -n 1 | cut -d "=" -f 2)" >> $GITHUB_ENV
-            echo "SOURCE_BOOT_IMAGE=$(cat .github/config.env | grep -w "SOURCE_BOOT_IMAGE" | head -n 1 | cut -d "=" -f 2)" >> $GITHUB_ENV
+        if [ $(cat .github/config.env | grep "USE_CONFIG" | head -n 1 | cut -d "=" -f 2) = true -o -z ${{ github.event.inputs.KERNEL_DEFCONFIG }} ]; then
+          echo "KERNEL_DEFCONFIG=$(cat .github/config.env | grep -w "KERNEL_DEFCONFIG" | head -n 1 | cut -d "=" -f 2)" >> $GITHUB_ENV
+          echo "KERNEL_FILE=$(cat .github/config.env | grep -w "KERNEL_FILE" | head -n 1 | cut -d "=" -f 2)" >> $GITHUB_ENV
+          echo "BUILD_EXTRA_COMMAND=$(cat .github/config.env | grep -w "EXTRA_BUILD_COMMAND" | head -n 1 | cut -d ":" -f 2)" >> $GITHUB_ENV
+          echo "USE_SUKISU=$(cat .github/config.env | grep -w "USE_SUKISU" | head -n 1 | cut -d "=" -f 2)" >> $GITHUB_ENV
+          echo "SUKISU_MODE=$(cat .github/config.env | grep -w "SUKISU_MODE" | head -n 1 | cut -d "=" -f 2)" >> $GITHUB_ENV
+          echo "USE_ReKernel=$(cat .github/config.env | grep -w "USE_ReKernel" | head -n 1 | cut -d "=" -f 2)" >> $GITHUB_ENV
+          echo "MAKE_BOOT_IMAGE=$(cat .github/config.env | grep -w "MAKE_BOOT_IMAGE" | head -n 1 | cut -d "=" -f 2)" >> $GITHUB_ENV
+          echo "SOURCE_BOOT_IMAGE=$(cat .github/config.env | grep -w "SOURCE_BOOT_IMAGE" | head -n 1 | cut -d "=" -f 2)" >> $GITHUB_ENV
         else
-            echo "KERNEL_DEFCONFIG=${{ github.event.inputs.KERNEL_DEFCONFIG }}" >> $GITHUB_ENV
-            echo "KERNEL_FILE=${{ github.event.inputs.KERNEL_FILE }}" >> $GITHUB_ENV
-            echo "BUILD_EXTRA_COMMAND=${{ github.event.inputs.BUILD_EXTRA_COMMAND }}" >> $GITHUB_ENV
-            echo "USE_KERNELSU=${{ github.event.inputs.USE_KERNELSU }}" >> $GITHUB_ENV
-            echo "USE_ReKernel=${{ github.event.inputs.USE_KERNELSU }}" >> $GITHUB_ENV
-            echo "KERNELSU_TAG=${{ github.event.inputs.KERNELSU_TAG }}" >> $GITHUB_ENV
-            echo "MAKE_BOOT_IMAGE=${{ github.event.inputs.MAKE_BOOT_IMAGE }}" >> $GITHUB_ENV
-            echo "SOURCE_BOOT_IMAGE=${{ github.event.inputs.SOURCE_BOOT_IMAGE }}" >> $GITHUB_ENV
+          echo "KERNEL_DEFCONFIG=${{ github.event.inputs.KERNEL_DEFCONFIG }}" >> $GITHUB_ENV
+          echo "KERNEL_FILE=${{ github.event.inputs.KERNEL_FILE }}" >> $GITHUB_ENV
+          echo "BUILD_EXTRA_COMMAND=${{ github.event.inputs.BUILD_EXTRA_COMMAND }}" >> $GITHUB_ENV
+          echo "USE_SUKISU=${{ github.event.inputs.USE_SUKISU }}" >> $GITHUB_ENV
+          echo "SUKISU_MODE=${{ github.event.inputs.SUKISU_MODE }}" >> $GITHUB_ENV
+          # 修正：这里应读取 USE_ReKernel 本身，而不是 USE_KERNELSU
+          echo "USE_ReKernel=${{ github.event.inputs.USE_ReKernel }}" >> $GITHUB_ENV
+          echo "MAKE_BOOT_IMAGE=${{ github.event.inputs.MAKE_BOOT_IMAGE }}" >> $GITHUB_ENV
+          echo "SOURCE_BOOT_IMAGE=${{ github.event.inputs.SOURCE_BOOT_IMAGE }}" >> $GITHUB_ENV
         fi
 
     - name: Setup build kernel environment
@@ -77,7 +80,7 @@ jobs:
         echo "BUILD_TIME=$(TZ=Asia/Shanghai date "+%Y%m%d%H%M")" >> $GITHUB_ENV
         echo "DEVICE=$(echo ${{ env.KERNEL_DEFCONFIG }} | sed 's!vendor/!!;s/_defconfig//;s/_user//;s/-perf//')" >> $GITHUB_ENV
         sudo apt-get update
-        sudo apt-get install git ccache automake flex lzop bison gperf build-essential zip curl zlib1g-dev g++-multilib libxml2-utils bzip2 libbz2-dev libbz2-1.0 libghc-bzlib-dev squashfs-tools pngcrush schedtool dpkg-dev liblz4-tool make optipng maven libssl-dev pwgen libswitch-perl policycoreutils minicom libxml-sax-base-perl libxml-simple-perl bc libc6-dev-i386 lib32ncurses5-dev libx11-dev lib32z-dev libgl1-mesa-dev xsltproc unzip device-tree-compiler python2 python3 openjdk-19-jdk openjdk-19-jre
+        sudo apt-get install -y git ccache automake flex lzop bison gperf build-essential zip curl zlib1g-dev g++-multilib libxml2-utils bzip2 libbz2-dev libbz2-1.0 libghc-bzlib-dev squashfs-tools pngcrush schedtool dpkg-dev liblz4-tool make optipng maven libssl-dev pwgen libswitch-perl policycoreutils minicom libxml-sax-base-perl libxml-simple-perl bc libc6-dev-i386 lib32ncurses5-dev libx11-dev lib32z-dev libgl1-mesa-dev xsltproc unzip device-tree-compiler python2 python3 openjdk-19-jdk openjdk-19-jre
 
     - name: Download Clang-aosp and Gcc-aosp
       run: |
@@ -103,11 +106,14 @@ jobs:
         echo "FORMAT_MKBOOTING=$(echo `mkbootimg/unpack_bootimg.py --boot_img=boot-source.img --format mkbootimg`)" >> $GITHUB_ENV
         rm -rf out
 
-    - name: Setup KernelSU
-      if: env.USE_KERNELSU == 'true'
+    # ---------- 用 SukiSU-Ultra 取代 KernelSU 集成 ----------
+    - name: Setup SukiSU-Ultra
+      if: env.USE_SUKISU == 'true'
       run: |
-        curl -LSs "https://raw.githubusercontent.com/tiann/KernelSU/main/kernel/setup.sh" | bash -s ${{ env.KERNELSU_TAG }}
-        echo "UPLOADNAME=-KernelSU" >> $GITHUB_ENV
+        # SUKISU_MODE 可为: main / nongki / susfs-<branch>
+        curl -LSs "https://raw.githubusercontent.com/SukiSU-Ultra/SukiSU-Ultra/main/kernel/setup.sh" | bash -s ${{ env.SUKISU_MODE }}
+        echo "UPLOADNAME=-SukiSU" >> $GITHUB_ENV
+    # --------------------------------------------------------
 
     - name: Setup Re:Kernel
       if: env.USE_ReKernel == 'true'
@@ -131,13 +137,13 @@ jobs:
 
     - name: Check a kernel output files
       run: |
-       if [ -f out/arch/arm64/boot/${{ env.KERNEL_FILE }} ]; then
-           echo "CHECK_FILE_IS_OK=true" >> $GITHUB_ENV
-       else
-           echo "Kernel output file is empty"
-           exit 1
-       fi
-  
+        if [ -f out/arch/arm64/boot/${{ env.KERNEL_FILE }} ]; then
+            echo "CHECK_FILE_IS_OK=true" >> $GITHUB_ENV
+        else
+            echo "Kernel output file is empty"
+            exit 1
+        fi
+
     - name: Make Anykernel3
       if: env.CHECK_FILE_IS_OK == 'true'
       run: |
@@ -183,3 +189,4 @@ jobs:
         repository: ${{ github.repository }}
         retain_days: 1
         keep_minimum_runs: 3
+
