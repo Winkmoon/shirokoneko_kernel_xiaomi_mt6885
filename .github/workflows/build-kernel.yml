@@ -39,7 +39,7 @@ on:
       SOURCE_BOOT_IMAGE:
         description: 'Your original boot image url'
         required: false
-        default: 'https://raw.githubusercontent.com/xiaomi-mt6885-devs/android_kernel_xiaomi_mt6885/cgroup-v2/.github/boot.img'
+        default: 'https://github.com/btree2/android_kernel_xiaomi_mt6885/raw/refs/heads/cgroup-v2/.github/boot.img'
 
 jobs:
   build:
