@@ -63,6 +63,14 @@ jobs:
         export KSU_VERSION=$KSU_VERSION
         sed -i "s/DKSU_VERSION=16/DKSU_VERSION=${KSU_VERSION}/" kernel/Makefile
         cd ..
+        echo "CONFIG_MODULE_SIG=y" >> ./arch/arm64/configs/vendor/cezanne_user_defconfig
+        echo "CONFIG_MODULE_SIG_ALL=y" >> ./arch/arm64/configs/vendor/cezanne_user_defconfig
+        echo "CONFIG_MODULES=y" >> ./arch/arm64/configs/vendor/cezanne_user_defconfig
+        echo "CONFIG_KERNELSU_DEBUG=n" >> ./arch/arm64/configs/vendor/cezanne_user_defconfig
+        echo "CONFIG_KSU=y" >> ./arch/arm64/configs/vendor/cezanne_user_defconfig
+        echo "CONFIG_MANUAL_HOOK=y" >> ./arch/arm64/configs/vendor/cezanne_user_defconfig
+        echo "CONFIG_KERNELSU=y" >> ./arch/arm64/configs/vendor/cezanne_user_defconfig
+        sed -i '/atomic_set(&current->seccomp.filter_count, 0);/d' drivers/kernelsu/core_hook.c
 
               
     - name: 设置ccache缓存
@@ -87,7 +95,7 @@ jobs:
       run: |
         cd $GITHUB_WORKSPACE/kernel_workspace
         git clone https://github.com/Winkmoon/AnyKernel3
-        cp kernel-4.14/out/arch/arm64/boot/Image.gz-dtb AnyKernel3/
+        cp xinran/out/arch/arm64/boot/Image.gz-dtb AnyKernel3/
         rm -rf AnyKernel3/.git* AnyKernel3/README.md
         
     
@@ -103,4 +111,4 @@ jobs:
       uses: actions/upload-artifact@v3
       with:
         name: Xinran_StarBai-xiaomimt6885-Image.gz-dtb
-        path: kernel_workspace/kernel-4.14/out/arch/arm64/boot/Image.gz-dtb
+        path: kernel_workspace/xinran/out/arch/arm64/boot/Image.gz-dtb
