@@ -9,7 +9,7 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
 
 
 
@@ -101,14 +101,14 @@ jobs:
     
     
     - name: 上传 Anykernel3
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: Xinran_StarBai-xiaomimt6885
         path: kernel_workspace/AnyKernel3/*
         
 
     - name: 上传编译内核
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: Xinran_StarBai-xiaomimt6885-Image.gz-dtb
         path: kernel_workspace/xinran/out/arch/arm64/boot/Image.gz-dtb
